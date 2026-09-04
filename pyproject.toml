@@ -1,0 +1,105 @@
+[project]
+name = "stavrophora"
+version = "0.1.0"
+description = "Python interface for the Crossref REST API, built on top of the bibliofabric framework."
+authors = [
+    {name = "Samuel Mok", email = "s.mok@utwente.nl"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+dependencies = [
+    "bibliofabric>=0.4.2,<0.5.0",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: AsyncIO",
+    "Typing :: Typed",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.26.0",
+    "pytest-cov>=6.1.1",
+    "pytest-httpx>=0.35.0",
+]
+docs = [
+    "mkdocs~=1.6.0",
+    "mkdocs-material~=9.5.0",
+    "mkdocstrings[python]",
+]
+lint = ["ruff>=0.8.0"]
+test = ["pytest", "pytest-randomly"]
+
+[project.urls]
+"Homepage" = "https://github.com/utsmok/stavrophora"
+
+[build-system]
+requires = ["uv_build>=0.11.19,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.pip]
+generate-hashes = true
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 60
+
+[tool.ruff.lint]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "I", # isort
+    "B", # bugbear -- flake8 bugfinder
+    "Q", # correct quotes usage
+    "PTH",  # Replace os functions with pathlib functions
+    "SIM", # Simplify statements
+    "RET", # Return value related rules
+    "PIE", # misc flake8 rules
+    "FBT", # boolean traps
+    "PERF", # performance optimization
+    "PL", # pylint
+    "UP", # check for deprecated ways of coding
+    "FURB",
+]
+ignore = ["PLR2004"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"**/client.py" = ["PLR0913", "PLR0912", "PLR0915", "PLC0415"]
+"**/session.py" = ["PLC0415"]
+"**/endpoints.py" = ["PLR0913"]
+"tests/**/*.py" = ["PLC0415", "PLR2004"]
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-branches = 25
+max-statements = 75
+max-returns = 10
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "live_api: marks tests that hit the live Crossref API (skipped by default)",
+]
+addopts = "-m 'not live_api'"
