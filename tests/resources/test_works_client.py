@@ -199,6 +199,34 @@ async def test_search_query_param(works_client, mock_api_client):
 
 
 @pytest.mark.asyncio
+async def test_search_parses_string_archive(works_client, mock_api_client):
+    """Regression (live 2026-09): ``archive`` is a list of bare strings
+    (["CLOCKSS", "LOCKSS", "Portico"]), not objects — the envelope must
+    parse into ApiResponse[Work], not fall back to raw data."""
+    mock_api_client.request.return_value = _mock_response(
+        {
+            "status": "ok",
+            "message": {
+                "total-results": 1,
+                "items": [
+                    {
+                        "DOI": "10.7717/peerj.1",
+                        "archive": ["CLOCKSS", "LOCKSS", "Portico"],
+                    }
+                ],
+            },
+        }
+    )
+    from stavrophora.models import ApiResponse, Work
+
+    response = await works_client.search(page_size=1)
+    assert isinstance(response, ApiResponse)
+    work = response.message.items[0]
+    assert isinstance(work, Work)
+    assert work.archive == ["CLOCKSS", "LOCKSS", "Portico"]
+
+
+@pytest.mark.asyncio
 async def test_search_invalid_filters_rejected(works_client):
     from bibliofabric.exceptions import BibliofabricError
 

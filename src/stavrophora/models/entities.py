@@ -3,7 +3,7 @@
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
 
-from .safe_types import SafeList, SafeStr, SafeStrList
+from .safe_types import IdSafeStr, SafeList, SafeStr, SafeStrList
 
 
 class Journal(BaseModel):
@@ -76,11 +76,16 @@ class CrossRefType(BaseModel):
 
 
 class Prefix(BaseModel):
-    """A Crossref DOI prefix owned by a member."""
+    """A Crossref DOI prefix owned by a member.
 
-    member: SafeStr | None = None
+    ``/prefixes/{prefix}`` returns ``member``/``prefix`` as full
+    ``https://id.crossref.org/...`` URIs (live 2026-09); ``IdSafeStr``
+    normalizes both URI and bare forms to the bare value.
+    """
+
+    member: IdSafeStr | None = None
     name: SafeStr | None = None
-    prefix: SafeStr | None = None
+    prefix: IdSafeStr | None = None
 
     model_config = ConfigDict(extra="allow")
 

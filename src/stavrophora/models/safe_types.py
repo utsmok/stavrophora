@@ -25,4 +25,18 @@ SafeStrList = Annotated[
     ),
 ]
 
-__all__ = ["SafeInt", "SafeList", "SafeStr", "SafeStrList"]
+#: ``SafeStr`` that also strips the ``https://id.crossref.org/{kind}/`` stem.
+#: ``/prefixes/{prefix}`` returns ``member``/``prefix`` as full URIs
+#: (``https://id.crossref.org/prefix/10.1038``); models normalize to bare values.
+IdSafeStr = Annotated[
+    SafeStr,
+    BeforeValidator(
+        lambda v: (
+            v.rsplit("/", 1)[-1]
+            if isinstance(v, str) and v.startswith("https://id.crossref.org/")
+            else v
+        )
+    ),
+]
+
+__all__ = ["IdSafeStr", "SafeInt", "SafeList", "SafeStr", "SafeStrList"]

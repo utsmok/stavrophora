@@ -26,7 +26,15 @@ async def test_get_prefix(prefixes_client, mock_api_client):
     result = await prefixes_client.get("10.1016")
     assert isinstance(result, Prefix)
     assert result.name == "Elsevier BV"
+    # /prefixes/{prefix} returns id.crossref.org URIs; model normalizes to bare values.
+    assert result.member == "78"
+    assert result.prefix == "10.1016"
     assert mock_api_client.request.call_args.args[1] == "prefixes/10.1016"
+
+
+def test_prefix_normalizes_bare_values_too():
+    result = Prefix.model_validate({"member": "297", "name": "S", "prefix": "10.1038"})
+    assert result.member == "297" and result.prefix == "10.1038"
 
 
 @pytest.mark.asyncio

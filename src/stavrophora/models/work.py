@@ -9,7 +9,7 @@ from .base import (
     FunderRef,
     LicenseRef,
 )
-from .safe_types import SafeInt, SafeList, SafeStr
+from .safe_types import SafeInt, SafeList, SafeStr, SafeStrList
 
 
 class Work(BaseModel):
@@ -92,7 +92,8 @@ class Work(BaseModel):
     clinical_trial_number: SafeList[dict] = Field(
         default_factory=list, alias="clinical-trial-number"
     )
-    archive: SafeList[dict] = Field(default_factory=list)
+    #: Live API returns bare archive names (``["CLOCKSS", "LOCKSS", "Portico"]``).
+    archive: SafeStrList = Field(default_factory=list)
     assertion: SafeList[dict] = Field(default_factory=list)
     event: dict | None = None
     agent: SafeStr | None = None
