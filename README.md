@@ -131,10 +131,12 @@ All bibliofabric settings (`REQUEST_TIMEOUT`, `MAX_RETRIES`, ...) are inherited 
 - **Cursor exhaustion is implicit**: the last non-empty page still returns a `next-cursor`; only the following request returns an empty `items` and no cursor.
 - **`/prefixes` has no list route** (404) -- only `/prefixes/{prefix}` and `/prefixes/{prefix}/works`. **`/licenses` has no single-item route** (404) -- only the list.
 - **The `message` envelope is one level deep** for everything: single items live in `message`, lists in `message.items` with totals in `message.total-results`.
-- **Rate limits changed 2025-12-01**: anonymous 1 req/s / 1 concurrent, polite 3 req/s / 3 concurrent (older docs say 5/10 req/s). Polite status is observable: only mailto-stamped requests carry `x-rate-limit-*` response headers.
+- **Rate limits changed 2025-12-01**: anonymous 1 req/s / 1 concurrent, polite 3 req/s / 3 concurrent (older docs say 5/10 req/s). Every response carries `x-rate-limit-*` headers and the advertised limit identifies the pool (live 2026-09): anonymous `1`, polite `3` on query routes and `10` on cacheable single-record routes (the pre-2025-12 value) -- treat 3 req/s as the polite ceiling.
 - **API is served at both `https://api.crossref.org` and `.../v1`** with identical payloads (verified 2026-09); stavrophora pins `/v1`, the versioned form.
 - **The Crossref spec is incomplete** -- several returned fields are missing from the official schema. All models use `extra="allow"`, same defense as aletheca.
 - **Schemas differ between list and single-item routes** (verified live): `/journals/{issn}` returns `title` as a bare string while `/journals` returns a list; member `prefix` entries are `{name, value}` objects. The models normalize both shapes (`SafeStrList`, dict-typed prefix entries).
+- **`/types` ignores `rows`/`offset`** (verified live 2026-09): the route always returns the complete list (~30 types) regardless of paging parameters.
+- **`/prefixes/{prefix}` returns `member` and `prefix` as full `https://id.crossref.org/member/297`-style URIs** (verified live 2026-09). The `Prefix` model normalizes both the URI and bare forms to bare values (`"297"`, `"10.1038"`).
 
 ## Development
 
