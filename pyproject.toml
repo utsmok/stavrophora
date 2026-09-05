@@ -1,6 +1,6 @@
 [project]
 name = "stavrophora"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python interface for the Crossref REST API, built on top of the bibliofabric framework."
 authors = [
     {name = "Samuel Mok", email = "s.mok@utwente.nl"}
@@ -9,7 +9,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.12"
 dependencies = [
-    "bibliofabric>=0.4.2,<0.5.0",
+    "bibliofabric>=0.5.1",
 ]
 
 classifiers = [
@@ -27,6 +27,8 @@ dev = [
     "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.1.1",
     "pytest-httpx>=0.35.0",
+    "ruff>=0.16.6",
+    "ty>=0.0.78",
 ]
 docs = [
     "mkdocs~=1.6.0",

@@ -1,6 +1,7 @@
 """Tests for StavrophoraSession."""
 
 import pytest
+from bibliofabric.auth import QueryParameterAuth
 
 from stavrophora.client import StavrophoraClient
 from stavrophora.config import StavrophoraSettings
@@ -25,7 +26,7 @@ async def test_session_with_mailto():
     """StavrophoraSession(mailto=...) should use QueryParameterAuth."""
     async with StavrophoraSession(mailto="test@example.org") as s:
         auth = s._api_client._auth_strategy
-        assert auth.__class__.__name__ == "QueryParameterAuth"
+        assert isinstance(auth, QueryParameterAuth)
         assert auth._key_name == "mailto"
         assert auth._key_value == "test@example.org"
 

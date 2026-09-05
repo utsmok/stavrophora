@@ -41,7 +41,9 @@ def test_no_mailto_defaults_to_no_auth():
 def test_mailto_from_settings():
     settings = StavrophoraSettings(mailto="settings@example.org")
     client = StavrophoraClient(settings=settings)
-    assert client._auth_strategy._key_value == "settings@example.org"
+    auth = client._auth_strategy
+    assert isinstance(auth, QueryParameterAuth)
+    assert auth._key_value == "settings@example.org"
 
 
 def test_explicit_auth_strategy_override():

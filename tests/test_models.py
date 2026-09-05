@@ -15,6 +15,7 @@ def test_work_parses_kebab_aliases(sample_work_json):
 
 def test_work_issued_date_parts(sample_work_json):
     work = Work.model_validate(sample_work_json)
+    assert work.issued is not None
     assert work.issued.date_parts == [[2013, 7, 31]]
     assert work.issued.year == 2013
 
@@ -37,8 +38,9 @@ def test_work_extra_fields_allowed():
         }
     )
     assert work.doi == "10.1234/x"
-    assert work.model_extra["brand-new-field"] == {"nested": True}
-    assert work.model_extra["another-one"] == 7
+    extra = work.model_extra or {}
+    assert extra["brand-new-field"] == {"nested": True}
+    assert extra["another-one"] == 7
 
 
 def test_work_safe_coercion():

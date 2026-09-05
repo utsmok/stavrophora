@@ -19,7 +19,7 @@ from typing import Any
 
 from bibliofabric.exceptions import BibliofabricError
 from bibliofabric.log_config import logger
-from bibliofabric.resources import BaseResourceClient
+from bibliofabric.resources import BaseResourceClient, OnError
 from pydantic import BaseModel
 
 from .._helpers import normalize_doi
@@ -201,6 +201,11 @@ class StavrophoraResourceClient(BaseResourceClient):
         filters: BaseModel | dict[str, Any] | None = None,
         search: str | None = None,
         select: list[str] | None = None,
+        *,
+        cursor: str | None = None,
+        on_error: OnError = "raw",
+        failures: list[tuple[dict[str, Any], Exception]] | None = None,
+        on_page: Callable[[int, str | None], Any] | None = None,
     ) -> AsyncIterator[Any]:
         """Iterate through all matching entities using Crossref cursor pagination.
 
@@ -215,11 +220,22 @@ class StavrophoraResourceClient(BaseResourceClient):
             filters: Filter criteria as a Pydantic model or dictionary.
             search: Free-text query.
             select: Field projection.
+            cursor: Resume from a previously emitted cursor (bibliofabric 0.5).
+            on_error: Parse-failure policy (``raw`` preserves legacy yields).
+            failures: Optional collector for ``(record, exception)`` pairs.
+            on_page: Optional ``(page_number, cursor)`` callback.
         """
         merged = self._merge_query_hints(filters, sort_by, select)
         sort_field = merged.pop(_SORT_KEY, None)
         async for entity in super().iterate(  # ty: ignore[unresolved-attribute]
-            page_size=page_size, sort_by=sort_field, filters=merged, search=search
+            page_size=page_size,
+            sort_by=sort_field,
+            filters=merged,
+            search=search,
+            cursor=cursor,
+            on_error=on_error,
+            failures=failures,
+            on_page=on_page,
         ):
             yield entity
 

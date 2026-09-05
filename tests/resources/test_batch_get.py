@@ -63,7 +63,7 @@ async def test_batch_get_multiple_batches(works_client, mock_api_client):
 
     async def fake_request(_method, _path, *, params=None, **_kw):
         calls.append(params)
-        dois = params["filter"].removeprefix("doi:").split(",")
+        dois = (params or {})["filter"].removeprefix("doi:").split(",")
         items = [{"DOI": d} for d in dois]
         return _mock_response(
             {"message": {"total-results": len(items), "items": items}}
