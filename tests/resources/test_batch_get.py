@@ -109,6 +109,19 @@ async def test_batch_get_doi_normalizes_case_and_prefix(works_client, mock_api_c
 
 
 @pytest.mark.asyncio
+async def test_batch_get_raw_fallback_resolves_uppercase_doi(
+    works_client, mock_api_client
+):
+    """Raw response items still resolve Crossref's uppercase DOI key."""
+    raw_work = {"DOI": "10.1234/raw", "issued": "not-a-date"}
+    mock_api_client.request.return_value = _mock_response(
+        {"message": {"total-results": 1, "items": [raw_work]}}
+    )
+    result = await works_client.batch_get(["10.1234/raw"])
+    assert result == {"10.1234/raw": raw_work}
+
+
+@pytest.mark.asyncio
 async def test_batch_get_custom_field_and_key_fn(works_client, mock_api_client):
     """Custom field name and key function pass through correctly."""
     mock_api_client.request.return_value = _mock_response(

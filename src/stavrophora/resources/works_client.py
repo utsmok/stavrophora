@@ -1,5 +1,6 @@
 """Client for the Crossref Works endpoint."""
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from bibliofabric.log_config import logger
@@ -8,6 +9,7 @@ from bibliofabric.resources import (
     GettableMixin,
     SearchableMixin,
 )
+from bibliofabric.types import ValidationErrorContext
 
 from .._helpers import encode_doi_path
 from ..models import ApiResponse, Work, WorkAgency
@@ -38,7 +40,13 @@ class WorksClient(
         super().__init__(api_client)
         logger.debug("WorksClient initialized.")
 
-    async def get(self, entity_id: str) -> Any:
+    async def get(
+        self,
+        entity_id: str,
+        *,
+        raw: bool = False,
+        on_validation_error: Callable[[ValidationErrorContext], None] | None = None,
+    ) -> Any:
         """Retrieve a single work by DOI.
 
         Accepts bare or ``https://doi.org/``-prefixed DOIs (mixed case
@@ -46,11 +54,17 @@ class WorksClient(
 
         Args:
             entity_id: The DOI of the work.
+            raw: Return the unparsed HTTP response.
+            on_validation_error: Optional hook called when model parsing fails.
 
         Returns:
             The parsed :class:`~stavrophora.models.Work`.
         """
-        return await super().get(encode_doi_path(entity_id))  # ty: ignore[invalid-argument-type]
+        return await super().get(
+            encode_doi_path(entity_id),
+            raw=raw,
+            on_validation_error=on_validation_error,
+        )  # ty: ignore[invalid-argument-type]
 
     async def agency(self, doi: str) -> WorkAgency:
         """Look up the DOI registration agency for a work.

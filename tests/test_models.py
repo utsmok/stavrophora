@@ -24,8 +24,25 @@ def test_work_nested_models(sample_work_json):
     work = Work.model_validate(sample_work_json)
     assert work.author[0].family == "Kucsko"
     assert work.author[1].name == "Scientific Collective"
+    assert work.author[0].orcid == "https://orcid.org/0000-0002-1234-5678"
     assert work.license[0].content_version == "vor"
     assert work.funder[0].doi == "10.13039/501100001711"
+
+
+def test_contributor_parses_uppercase_orcid():
+    work = Work.model_validate(
+        {"author": [{"ORCID": "http://orcid.org/0000-0003-4154-1711"}]}
+    )
+    assert work.author[0].orcid == "http://orcid.org/0000-0003-4154-1711"
+
+
+def test_work_accepts_string_or_list_update_to():
+    update = [{"DOI": "10.1234/retraction", "type": "retraction"}]
+    work = Work.model_validate({"update-to": update})
+    assert work.update_to == update
+    assert Work.model_validate({"update-to": "10.1234/retraction"}).update_to == (
+        "10.1234/retraction"
+    )
 
 
 def test_work_extra_fields_allowed():

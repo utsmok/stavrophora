@@ -20,6 +20,7 @@ from typing import Any
 from bibliofabric.exceptions import BibliofabricError
 from bibliofabric.log_config import logger
 from bibliofabric.resources import BaseResourceClient, OnError
+from bibliofabric.types import ValidationErrorContext
 from pydantic import BaseModel
 
 from .._helpers import normalize_doi
@@ -136,6 +137,9 @@ class StavrophoraResourceClient(BaseResourceClient):
         filters: BaseModel | dict[str, Any] | None = None,
         search: str | None = None,
         select: list[str] | None = None,
+        *,
+        raw: bool = False,
+        on_validation_error: Callable[[ValidationErrorContext], None] | None = None,
     ) -> BaseModel | dict[str, Any]:
         """Search with Crossref's ``offset``/``rows`` paging.
 
@@ -146,6 +150,8 @@ class StavrophoraResourceClient(BaseResourceClient):
             filters: Filter criteria as a Pydantic model or dictionary.
             search: Free-text query (``query`` parameter).
             select: Field projection, e.g. ``["DOI", "title"]``.
+            raw: Return the unparsed HTTP response.
+            on_validation_error: Optional hook called when response parsing fails.
 
         Returns:
             Parsed ``ApiResponse`` model (or raw dict if parsing fails).
@@ -171,12 +177,23 @@ class StavrophoraResourceClient(BaseResourceClient):
                 self._entity_path,
                 params=params,
                 base_url_override=self._base_url_override,
+                **({"raw": True} if raw else {}),
             )
+            if raw:
+                return response
             response_data = response.json()
             if self._search_response_model:
                 try:
                     return self._search_response_model.model_validate(response_data)
                 except Exception as e:
+                    if on_validation_error is not None:
+                        on_validation_error(
+                            ValidationErrorContext(
+                                raw=response.content,
+                                error=e,
+                                response=response,
+                            )
+                        )
                     logger.warning(
                         f"Failed to parse search response with "
                         f"{self._search_response_model.__name__}: {e}. "
@@ -205,6 +222,7 @@ class StavrophoraResourceClient(BaseResourceClient):
         cursor: str | None = None,
         on_error: OnError = "raw",
         failures: list[tuple[dict[str, Any], Exception]] | None = None,
+        on_validation_error: Callable[[ValidationErrorContext], None] | None = None,
         on_page: Callable[[int, str | None], Any] | None = None,
     ) -> AsyncIterator[Any]:
         """Iterate through all matching entities using Crossref cursor pagination.
@@ -223,6 +241,7 @@ class StavrophoraResourceClient(BaseResourceClient):
             cursor: Resume from a previously emitted cursor (bibliofabric 0.5).
             on_error: Parse-failure policy (``raw`` preserves legacy yields).
             failures: Optional collector for ``(record, exception)`` pairs.
+            on_validation_error: Optional hook called for rejected records.
             on_page: Optional ``(page_number, cursor)`` callback.
         """
         merged = self._merge_query_hints(filters, sort_by, select)
@@ -235,6 +254,7 @@ class StavrophoraResourceClient(BaseResourceClient):
             cursor=cursor,
             on_error=on_error,
             failures=failures,
+            on_validation_error=on_validation_error,
             on_page=on_page,
         ):
             yield entity
@@ -362,7 +382,17 @@ class StavrophoraResourceClient(BaseResourceClient):
             return key_fn(entity)
         raw = getattr(entity, field, None) if isinstance(entity, BaseModel) else None
         if raw is None and isinstance(entity, dict):
-            raw = entity.get(field)
+            field_key = field.casefold()
+            raw = next(
+                (
+                    value
+                    for key, value in entity.items()
+                    if isinstance(key, str)
+                    and key.casefold() == field_key
+                    and value is not None
+                ),
+                None,
+            )
         if raw is None:
             return None
         if isinstance(raw, list):
