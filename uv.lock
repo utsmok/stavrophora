@@ -35,7 +35,7 @@ wheels = [
 
 [[package]]
 name = "bibliofabric"
-version = "0.5.1"
+version = "0.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cachetools" },
@@ -45,9 +45,9 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/94/76/964e4c780ea185d440223e50141bea984d115ba275bfce2535f8c4cfe70b/bibliofabric-0.5.1.tar.gz", hash = "sha256:87cb902b9104f81172126aa6fb31d2b3b4ffa9084b018fb73562f1252915289e", size = 98851, upload-time = "2026-09-05T21:06:04.488Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/4c/ad8a9698d989ace7113944f2107e3ececec610c3f4e3a01ce83a6702df1e/bibliofabric-0.5.2.tar.gz", hash = "sha256:eafd8fb88a0b882359bfd43bef854fb7431090610a5a55dd3e2c5f1d561e3922", size = 101470, upload-time = "2026-09-08T11:21:45.728Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5f/08/4c2dd9f4f8b9635f982b561a727491fdb14d4c8ee662f1a8f8020e0b0fa7/bibliofabric-0.5.1-py3-none-any.whl", hash = "sha256:ba24b1bc9c5227d4130e0bc89469c2f40fa97f6a3b946f9f7e95a4c819b37568", size = 33266, upload-time = "2026-09-05T21:06:03.24Z" },
+    { url = "https://files.pythonhosted.org/packages/26/a3/fe5a3280d13208735f26cd2f95bf24c077a3a6bf774fd3e54a534ef3143c/bibliofabric-0.5.2-py3-none-any.whl", hash = "sha256:ff3e165cd550e6b4d500803d3ce84e8b2d6335a861eab40ca918a24d6d6d3f46", size = 35020, upload-time = "2026-09-08T11:21:44.5Z" },
 ]
 
 [[package]]
@@ -1090,7 +1090,7 @@ wheels = [
 
 [[package]]
 name = "stavrophora"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "bibliofabric" },
@@ -1119,7 +1119,7 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "bibliofabric", specifier = ">=0.5.1" }]
+requires-dist = [{ name = "bibliofabric", specifier = ">=0.5.2" }]
 
 [package.metadata.requires-dev]
 dev = [
