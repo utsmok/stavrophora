@@ -1,5 +1,6 @@
 """Client for the Crossref Funders endpoint."""
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bibliofabric.log_config import logger
@@ -8,6 +9,7 @@ from bibliofabric.resources import (
     GettableMixin,
     SearchableMixin,
 )
+from bibliofabric.types import ValidationErrorContext
 
 from .._helpers import encode_doi_path
 from ..models import ApiResponse, Funder
@@ -32,16 +34,28 @@ class FundersClient(
         super().__init__(api_client)
         logger.debug("FundersClient initialized.")
 
-    async def get(self, entity_id: str) -> object:
+    async def get(
+        self,
+        entity_id: str,
+        *,
+        raw: bool = False,
+        on_validation_error: Callable[[ValidationErrorContext], None] | None = None,
+    ) -> object:
         """Retrieve a single funder by its Funder Registry DOI.
 
         Args:
             entity_id: Funder Registry DOI (e.g. ``10.13039/501100000923``).
+            raw: Return the unparsed HTTP response.
+            on_validation_error: Optional hook called when model parsing fails.
 
         Returns:
             The parsed :class:`~stavrophora.models.Funder`.
         """
-        return await super().get(encode_doi_path(entity_id))  # ty: ignore[invalid-argument-type]
+        return await super().get(
+            encode_doi_path(entity_id),
+            raw=raw,
+            on_validation_error=on_validation_error,
+        )  # ty: ignore[invalid-argument-type]
 
     def works(self, funder_id: str) -> ScopedWorksClient:
         """Get a works client scoped to a funder.
