@@ -2,7 +2,7 @@
 
 from typing import TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 from pydantic.config import ConfigDict
 
 from .safe_types import SafeList
@@ -99,7 +99,9 @@ class Contributor(BaseModel):
     given: str | None = None
     family: str | None = None
     name: str | None = None
-    orcid: str | None = None
+    orcid: str | None = Field(
+        None, validation_alias=AliasChoices("ORCID", "orcid")
+    )
     affiliation: SafeList[dict] = Field(default_factory=list)
     sequence: str | None = None
     authenticated_orcid: bool | None = Field(None, alias="authenticated-orcid")

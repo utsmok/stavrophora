@@ -87,7 +87,7 @@ class Work(BaseModel):
     content_domain: dict | None = Field(None, alias="content-domain")
     relation: dict | None = None
     update_policy: SafeStr | None = Field(None, alias="update-policy")
-    update_to: SafeStr | None = Field(None, alias="update-to")
+    update_to: SafeStr | SafeList[dict] | None = Field(None, alias="update-to")
     group_title: SafeStr | None = Field(None, alias="group-title")
     clinical_trial_number: SafeList[dict] = Field(
         default_factory=list, alias="clinical-trial-number"

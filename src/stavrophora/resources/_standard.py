@@ -362,7 +362,17 @@ class StavrophoraResourceClient(BaseResourceClient):
             return key_fn(entity)
         raw = getattr(entity, field, None) if isinstance(entity, BaseModel) else None
         if raw is None and isinstance(entity, dict):
-            raw = entity.get(field)
+            field_key = field.casefold()
+            raw = next(
+                (
+                    value
+                    for key, value in entity.items()
+                    if isinstance(key, str)
+                    and key.casefold() == field_key
+                    and value is not None
+                ),
+                None,
+            )
         if raw is None:
             return None
         if isinstance(raw, list):
