@@ -1,71 +1,44 @@
-"""Shared test fixtures for stavrophora tests."""
+"""Shared fixtures: a client with the pacing gate disabled, and probe fixtures."""
+
+import json
+from pathlib import Path
 
 import pytest
 
-from stavrophora.unwrapper import CrossrefUnwrapper
+from stavrophora import StavrophoraClient, StavrophoraSettings
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def fixture(name: str) -> dict:
+    """Load a trimmed real response body from ``tests/fixtures``."""
+    return json.loads((FIXTURES / name).read_text())
 
 
 @pytest.fixture
-def unwrapper():
-    return CrossrefUnwrapper()
+def settings() -> StavrophoraSettings:
+    # max_requests_per_second=None skips the pacing gate so mocked tests stay fast
+    return StavrophoraSettings(
+        mailto="tester@example.org", max_requests_per_second=None, max_concurrency=8
+    )
 
 
 @pytest.fixture
-def sample_work_json():
-    return {
-        "DOI": "10.1038/nature12373",
-        "title": ["Nanometre-scale thermometry in a living cell"],
-        "container-title": ["Nature"],
-        "type": "journal-article",
-        "publisher": "Springer Science and Business Media LLC",
-        "issued": {"date-parts": [[2013, 7, 31]]},
-        "is-referenced-by-count": 500,
-        "ISSN": ["0028-0836", "1476-4687"],
-        "subject": ["Science", "Nature and Landscape Ecology"],
-        "author": [
-            {
-                "given": "G.",
-                "family": "Kucsko",
-                "orcid": "https://orcid.org/0000-0002-1234-5678",
-                "affiliation": [{"name": "ETH Zurich"}],
-                "sequence": "first",
-                "authenticated-orcid": False,
-            },
-            {"name": "Scientific Collective", "sequence": "additional"},
-        ],
-        "license": [
-            {
-                "URL": "https://creativecommons.org/licenses/by/4.0/",
-                "content-version": "vor",
-                "delay": 0,
-            }
-        ],
-        "funder": [
-            {
-                "name": "Swiss National Science Foundation",
-                "DOI": "10.13039/501100001711",
-                "award": ["123456"],
-                "doi-asserted": True,
-            }
-        ],
-        "reference-count": 50,
-        "member": "298",
-        "prefix": "10.1038",
-        "edition-number": None,
-        "assertion": None,
-    }
+async def client(settings):
+    async with StavrophoraClient(settings=settings) as client:
+        yield client
 
 
-@pytest.fixture
-def sample_works_response(sample_work_json):
+def works_envelope(items: list[dict], **message: object) -> dict:
+    """Build a minimal Crossref list envelope around the given items."""
+    message.setdefault("total-results", len(items))
     return {
         "status": "ok",
         "message-type": "work-list",
-        "message-version": "1.0.0",
-        "message": {
-            "query": {"search-terms": None, "start-index": 0},
-            "total-results": 1,
-            "items-per-page": 20,
-            "items": [sample_work_json],
-        },
+        "message": {"items": items, **message},
     }
+
+
+def work(doi: str) -> dict:
+    """Minimal work record that parses into ``Work``."""
+    return {"DOI": doi, "title": [f"Work {doi}"], "type": "journal-article"}
