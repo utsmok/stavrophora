@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **This repository is archived.** Stavrophora now lives in the
+> [bibliofabric monorepo](https://github.com/utsmok/bibliofabric) under
+> `packages/stavrophora`. Docs: <https://utsmok.github.io/bibliofabric/stavrophora/>.
+> The PyPI package name is unchanged: `pip install stavrophora`.
+
 # Stavrophora: Asynchronous Python client for the Crossref API
 
 Samuel Mok -- s.mok@utwente.nl -- 2026
